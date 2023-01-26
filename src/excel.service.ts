@@ -1,11 +1,16 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { GenerateExcelFileDto } from './dto/generate-excel-file.dto';
+import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { GenerateExcelFileDto } from './config/generate-excel-file.dto';
 import * as fs from 'fs';
-
+import { EXCEL_SERVICE, ExcelModuleOptions } from "./config/excel-module-options.interface";
 const ExcelJS = require('exceljs');
 
 @Injectable()
-export class ReportService {
+export class ExcelService {
+
+  private config: ExcelModuleOptions;
+  constructor(@Inject(EXCEL_SERVICE) config: ExcelModuleOptions) {
+    this.config = config
+  }
 
   async generateExcelFile(body: GenerateExcelFileDto) {
     const { data, path, fileName } = body;
@@ -15,21 +20,13 @@ export class ReportService {
     data.forEach(d => rows.push([Object.values(d).toString()]));
 
     const workbook = new ExcelJS.Workbook();
+
     const worksheet = workbook.addWorksheet('report', {
-      pageSetup: {
-        fitToPage: true,
-        fitToHeight: 15,
-        fitToWidth: 15,
-      },
-      properties: {
-        defaultRowHeight : 25,
-        defaultColWidth : 20
-      }
+      pageSetup: this.config.options.pageSetup,
+      properties: this.config.options.properties
     });
 
     worksheet.addRows(rows);
-
-    // const buffer = await workbook.xlsx.writeBuffer();
 
     const file = this.makeFile(path, fileName)
 
