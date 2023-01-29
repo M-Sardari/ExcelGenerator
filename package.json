@@ -1,8 +1,11 @@
 {
   "name": "ms-excel-generator",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "description": "",
   "main": "dist/index.js",
+  "scripts": {
+    "release": "standard-version"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/M-Sardari/ExcelGenerator.git"
@@ -15,7 +18,8 @@
   "homepage": "https://github.com/M-Sardari/ExcelGenerator#readme",
   "dependencies": {
     "@nestjs/common": "^9.0.0",
-    "exceljs": "^4.3.0"
+    "exceljs": "^4.3.0",
+    "standard-version": "^9.5.0"
   },
   "devDependencies": {
     "@types/node": "^16.0.0",
