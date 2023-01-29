@@ -8,7 +8,7 @@ export class ExcelModule {
       providers: [
         {
           provide: EXCEL_SERVICE,
-          useValue: ExcelModuleOptions,
+          useValue: options,
         },
       ]
     };
