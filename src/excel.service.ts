@@ -2,7 +2,8 @@ import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { GenerateExcelFileDto } from './config/generate-excel-file.dto';
 import * as fs from 'fs';
 import { EXCEL_SERVICE, ExcelModuleOptions } from "./config/excel-module-options.interface";
-const ExcelJS = require('exceljs');
+import { Workbook } from 'exceljs';
+
 
 @Injectable()
 export class ExcelService {
@@ -15,16 +16,14 @@ export class ExcelService {
   async generateExcelFile(body: GenerateExcelFileDto) {
     const { data, path, fileName } = body;
     const header = data.map(header => Object.keys(header))[0];
+
     const rows = [header];
 
-    data.forEach(d => rows.push([Object.values(d).toString()]));
+    data.forEach((d) => rows.push(Object.values(d)));
 
-    const workbook = new ExcelJS.Workbook();
+    const workbook = new Workbook();
 
-    const worksheet = workbook.addWorksheet('report', {
-      pageSetup: this.config.options.pageSetup,
-      properties: this.config.options.properties
-    });
+    const worksheet = workbook.addWorksheet('report', this.config.options);
 
     worksheet.addRows(rows);
 
@@ -33,15 +32,20 @@ export class ExcelService {
     try {
       await workbook.xlsx.writeFile(file);
     } catch (e) {
-      throw new HttpException(`error in generate excel file and errorMessage is: ${e}`,HttpStatus.BAD_REQUEST);
+      throw new HttpException(`error in generate excel file and errorMessage is: ${e}`, HttpStatus.BAD_REQUEST);
     }
   }
 
-  makeFile(path: string, fileName: string) {
+  makeFile(path: string, fileName: string, isUniqueName: boolean = false) {
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });
     }
-    fileName = fileName ? fileName + '-' : 'report-';
-    return path + '/' + fileName + new Date().getTime() + '.xlsx';
+
+    if (isUniqueName) {
+      fileName = fileName ? fileName : 'report';
+    } else {
+      fileName = fileName ? `${fileName}-${new Date().getTime()}` : `report-${new Date().getTime()}`;
+    }
+    return path + '/' + fileName + '.xlsx';
   }
 }
